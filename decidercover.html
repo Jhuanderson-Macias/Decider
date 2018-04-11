@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+  
+
+    <title>Decider</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    
+    <!-- Custom styles for this template -->
+    <link href="decider.css" rel="stylesheet">
+  </head>
+
+  <body class="text-center">
+
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+      <header class="masthead mb-auto">
+        <div class="inner">
+          <h3 class="masthead-brand">Decider</h3>
+          <nav class="nav nav-masthead justify-content-center">
+            <a class="nav-link active" href="#">Home</a>
+            <a class="nav-link" href="/Users/Jhuanderson/Desktop/Deicder/CantDecide.htm">Features</a>
+          </nav>
+        </div>
+      </header>
+
+      <main role="main" class="inner cover">
+        <h1 class="cover-heading">Enter your cravings.</h1>
+        <p class="lead">We'll do the work<p>
+        <p class="lead">
+          <a href="/Users/Jhuanderson/Desktop/Deicder/CantDecide.htm" class="btn btn-lg btn-secondary">Start </a>
+        </p>
+      </main>
+
+      <footer class="mastfoot mt-auto">
+        <div class="inner">
+          <p>by <a href="https://instragram.com/Jhuanderson">@Jhuanderson</a>.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      //Array of images which you want to show: Use path you want.
+      var images=new Array('vinicius-amano-581378-unsplash.jpg','spencer-pugh-538959-unsplash.jpg','clifford-yeo-452260-unsplash.jpg');
+      var nextimage=0;
+      doSlideshow();
+
+      function doSlideshow(){
+          if(nextimage>=images.length){nextimage=0;}
+          $('body')
+          .css('background-image','url("'+images[nextimage++]+'")')
+          .fadeIn(500,function(){
+              setTimeout(doSlideshow,4000);
+          });
+      }
+  </script>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script>window.jQuery</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
