@@ -23,25 +23,74 @@
 
 
 
+  <!-- Custom styles for this template  -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
     crossorigin="anonymous">
 
-
-  <!-- Custom styles for this template -->
-  <link href="decider.css" rel="stylesheet">
+  
+  <link href="decider.css" rel="stylesheet"> 
 </head>
 <style>
   /* Always set the map height explicitly to define the size of the div
        * element that contains the map. */
 
-  #map {
-    height: 100%;
-    width: 100%
+  #features{
+  position: absolute;
+  width: 300px;
+  height: 200px;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
   }
-  #mapOuterDiv{
-    height:500px;
-    width: 500px;
+
+  #pac-input{
+      width: 400px;
   }
+
+  #automplete-3{
+    margin-bottom: 25px;
+  }
+
+  #loaderContainer{
+  position: relative;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+  border: 3px;
+  display:block;
+  height: 200px;
+  }
+
+  #foodInputButton{
+    cursor: pointer;
+    position: relative;
+    left: 0;
+    background-color: #EEE;
+    margin: .5em;
+    padding: .3em 0;
+    height: 1.6em;
+    border-radius: 4px;
+    width: 200px;
+    height: 150px;
+  }
+ #foodInput{
+  position: absolute;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+ }
+
+  #foodInputButton:hover {
+  background-color:darkgray;
+  color: white;
+}
+
+ #submit{
+  margin-top: 25px
+ }
 
   #loader {
     border: 16px solid #f3f3f3; /* Light grey */
@@ -51,6 +100,8 @@
     height: 120px;
     animation: spin 2s linear infinite;
     position:absolute;
+    margin-left: 50px;
+    margin-top: 50px;
 }
   /* Safari */
   @-webkit-keyframes spin {
@@ -66,16 +117,69 @@
 
   /* Optional: Makes the sample page fill the window. */
 
+  #labelforAA{
+    display: -webkit-box;
+  }
+
   #features {
     animation: 1s ease-out 0s 1 slideInFromLeft;
+  }
+
+   #map {
+    height: 100%;
+    width: 100%; 
+  }
+
+  #mapOuterDiv{
+    padding-top: 100px;
+    bottom: 100%;
+    margin-top: 34px;
+    width: 70%;
+    height: 600px;
+    /* padding: 0%; */
+    margin: 0px 0 0 100px;
+    float:left;
+
+  }
+
+  #application {
+    width: 100%;
+
   }
 </style>
 <script>
     var terms =[] 
     var infowindow;
     var place;
+    localStorage.ifBar = "";
+    localStorage.type = "";
 
+function Expander() {
+    	
+      this.start = function () {
+            
+          $("#automplete-3").keydown(function(e) {
+                       
+              this.style.width = 0;
+              var newWidth = this.scrollWidth + 10;
+            
+              if( this.scrollWidth >= this.clientWidth )
+                  newWidth += 10;
+              
+              this.style.width = newWidth + 'px';
+            
+          });
+          
+      }
+        
+  }
+
+   
   $(function () {
+    window.app = new Expander();
+   	
+
+
     var availableTutorials = ['Afghan', 'African', 'Albanian', 'American',
       'Arabian', 'Argentinian', 'Armenian', 'Asian Fusion', 'Australian', 'Austrian',
       'Bagels', 'Bakery', 'Bangladeshi', 'Barbeque', 'Belgian', 'Brasseries', 'Brazilian',
@@ -115,6 +219,7 @@
         },
         focus: function() {
           // prevent value inserted on focus
+          
           return false;
         },
         select: function( event, ui ) {
@@ -126,22 +231,44 @@
           // add placeholder to get the comma-and-space at the end
           terms.push( "" );
           console.log(terms)
+
           this.value = terms.join( ", " );
+            
           return false;
         }
+        
+       
     });
+
+              
+
   });
+  
 
 
 
 function showFoodSelection() {
-  $("#foodInput").css("visibility", "visible");
+  $("#features").css("visibility", "hidden");
+  $("#foodInput").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  $(".Location_forBar").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  localStorage.ifBar = false;
+  localStorage.type = "resturant";
 }
 
+function enterLocation() {
+  console.log("enterlocation");
+  $(".Location_forBar").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  $("#features").css("visibility", "hidden");
+  localStorage.ifBar = true;
+  localStorage.type ="bar";
+}
+
+let selection = "";
 function randomGenerate(SelectionArray){
   var randomgen = Math.floor(Math.random() * (SelectionArray.length-1));
   console.log("RADOM NUMBER: " + randomgen);
   console.log("RADOM SELECT: " + SelectionArray[randomgen]);
+  localStorage.setItem("selection",SelectionArray[randomgen]);
   return SelectionArray[randomgen];
 }
 
@@ -264,7 +391,7 @@ function randomGenerate(SelectionArray){
         service.nearbySearch({
           location: place,
           radius: 500,
-          type: ['resturant'],
+          type: [localStorage.type],
           keyword: randomGenerate(terms)
         }, callback);
 
@@ -273,9 +400,19 @@ function randomGenerate(SelectionArray){
             console.log("nothing here");
           }
           if (status === google.maps.places.PlacesServiceStatus.OK) {
+           
+            if(localStorage.type =='bar'){
+            var randomgen = Math.floor(Math.random() * (results.length-1));
+              createMarker(results[randomgen]);
+              console.log(results[randomgen].name);  
+              localStorage.name = results[randomgen].name;
+              localStorage.setItem("selection","is Bar");
+                      } else {
+
             for (var i = 0; i < results.length; i++) {
-              createMarker(results[i]);
+             createMarker(results[i]);
             }
+          }
           }
         }
 
@@ -301,14 +438,28 @@ function randomGenerate(SelectionArray){
 
 
       function showMap(){
-      $("#loader").css("visibility", "visible");
-      $("#mainBody").css("visibility", "hidden");
+      $('#backgroundblur').css("filter", "blur(3px)");
+      $("#loaderContainer").css({"visibility": "visible"});
       $("#foodInput").css("visibility", "hidden");
-      $("#waiting").text("Applying complex algorithm to find out what you are craving")
+      $(".Location_forBar").css("visibility", "hidden");
      sleep(4000).then(() => {
       $("#mapOuterDiv").css("visibility", "visible");
-      $("#loader").css("visibility", "hidden");
-      $("#waiting").css("visibility","hidden");
+      $("#loaderContainer").css("visibility", "hidden");
+      $("#waiting").css("visibility","hidden")
+
+      if(localStorage.getItem("selection") == "undefined") {
+        $("#selectionP").text("Cannot find a place in your area");
+      } 
+      
+      else if (localStorage.ifBar == "false") {
+        $("#selectionP").text("Your Craving has been choosen: " +  localStorage.getItem("selection"));
+      }
+
+      else{
+        $("#selectionP").text("The Bar has been choosen. Go to " +  localStorage.name);
+      };
+
+      
 });
      
     }
@@ -316,9 +467,15 @@ function randomGenerate(SelectionArray){
 </script>
 </head>
 
-<body class="text-center">
+<body>
 
-  <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+
+    <div id="loaderContainer" style="visibility: hidden">
+        <p id="waiting">Applying complex algorithm to find out what you are craving</p>
+        <span id="loader"></span>
+    </div>
+
+  <div id="application">
     <header class="masthead mb-auto">
       <div class="inner">
         <h3 class="masthead-brand">Decider</h3>
@@ -328,47 +485,54 @@ function randomGenerate(SelectionArray){
         </nav>
       </div>
     </header>
-    <div id="loader" style = "visibility: hidden"></div>
-    <p id="waiting"></p>
+   
     <main role="main" class="inner cover" id="mainBody">
       
-      <div class="features">
-        <button type="button" onclick="showFoodSelection()">Need help with your craving</button>
+      <div id="features">
+        <button type="button" onclick="showFoodSelection()" id="foodInputButton">Need help with your craving</button>
+        <button type="button" onclick="enterLocation()" id="foodInputButton">Need Help Tonight's Adventure</button>
+      </div>
 
-        <div id="foodInput" style="visibility: hidden">Input your
+        <div id="foodInput" style="visibility: hidden">
           <div class="ui-widget">
-            <p>Type two letter for e.g:ja,sc etc</p>
-            <label for="automplete-3">Tags: </label>
-            <input id="automplete-3">
+            <p id="choosen"></p>
+            <label for="automplete-3" id="labelforAA">Enter the cuisine you are craving</label>
+            <textarea id="automplete-3" width="200px" height="500px"></textarea>
           </div>
-        </div>
 
-
+          <div class="Location_forBar" style="visibility: hidden"> 
         <input id="pac-input" class="controls" type="text" placeholder="Enter a location">
         <div class="lead">
-          <button type="button" class="btn btn-lg btn-secondary" onclick="showMap()">Submit</button>
-          </div>
-        <div id="mapOuterDiv" style="visibility: hidden">
-        <div id="map"></div>
-      </div>
-        <div id="infowindow-content">
-          <span id="place-name" class="title"></span>
-          <span id="place-id"></span>
-          <br>
-          <span id="place-address"></span>
+          <button type="button" class="btn btn-lg btn-secondary" id="submit" onclick="showMap()">Submit</button>
         </div>
-   </div>
+          </div>
+        </div>
+
+          
+              
+              
+
+
+   
     </main>
 
+    <div id="mapOuterDiv" style="visibility: hidden">
+        <div id="selectiondiv">
+            <p id="selectionP"></p>
+          </div>
 
-    <footer class="mastfoot mt-auto">
-      <div class="inner">
-        <p>by
-          <a href="https://instragram.com/Jhuanderson">@Jhuanderson</a>.</p>
+          <div id="map"></div>
+        
+          <div id="infowindow-content">
+            <span id="place-name" class="title"></span>
+            <span id="place-id"></span>
+            <br>
+            <span id="place-address"></span>
+          </div>
+    
       </div>
-    </footer>
+
   </div>
-  
 
 
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo45h3F0P6M4c5UJHM3Y_zLfJOs7WeCXI&libraries=places&callback=initMap"
