@@ -92,6 +92,13 @@
   margin-top: 25px
  }
 
+ #header-decide-bar{
+   padding-left:30px;
+   padding-right: 100px;
+   margin-left: 50px;
+   justify-content: left;
+ }
+
   #loader {
     border: 16px solid #f3f3f3; /* Light grey */
     border-top: 16px solid #3498db; /* Blue */
@@ -131,21 +138,18 @@
   }
 
   #mapOuterDiv{
-    padding-top: 100px;
     bottom: 100%;
     margin-top: 34px;
-    width: 70%;
-    height: 600px;
+    width: 80%;
+    height: 400px;
     /* padding: 0%; */
     margin: 0px 0 0 100px;
-    float:left;
+    float: left;
+    top:50%;
 
   }
 
-  #application {
-    width: 100%;
 
-  }
 </style>
 <script>
     var terms =[] 
@@ -198,7 +202,7 @@ function Expander() {
       'Portuguese', 'Potato', 'Poutineries', 'Pub Food', 'Puerto Rican', 'Ribs', 'Russian', 'Salad', 'Sandwiches', 'Scandinavian',
       'Scottish', 'Seafood', 'Senegalese', 'Singaporean', 'Slovakian', 'Small Plates', 'Smoothies and Juices', 'Soul Food', 'Soup',
       'South African', 'South American', 'Southern', 'Southwestern', 'Spanish', 'Sri Lankan', 'Steakhouses', 'Subs', 'Supper Clubs',
-      'Sushi Bars', 'Syrian', 'Szechwan', 'Taiwanese', 'Tapas', 'Tex-Mex', 'Thai', 'Tibetan', 'Turkish', 'Ukrainian', 'Uzbek', 'Vegan',
+      'Sushi', 'Syrian', 'Szechwan', 'Taiwanese', 'Tapas', 'Tex-Mex', 'Thai', 'Tibetan', 'Turkish', 'Ukrainian', 'Uzbek', 'Vegan',
       'Vegetarian', 'Vietnamese', 'Wraps'
     ];
 
@@ -398,6 +402,7 @@ function randomGenerate(SelectionArray){
         function callback(results, status) {
           if (results.length == 0){
             console.log("nothing here");
+            localStorage.setItem("selection","undefined");
           }
           if (status === google.maps.places.PlacesServiceStatus.OK) {
            
@@ -420,7 +425,7 @@ function randomGenerate(SelectionArray){
           var placeLoc = place.geometry.location;
           var marker = new google.maps.Marker({
             map: map,
-            position: place.geometry.location
+            position: place.geometry.location,
           });
 
           google.maps.event.addListener(marker, 'click', function () {
@@ -436,16 +441,18 @@ function randomGenerate(SelectionArray){
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+function reload(){
+  location.reload();
+}
 
       function showMap(){
-      $('#backgroundblur').css("filter", "blur(3px)");
-      $("#loaderContainer").css({"visibility": "visible"});
+      $("#loaderContainer").css({"visibility": "visible","display":"block"});
       $("#foodInput").css("visibility", "hidden");
       $(".Location_forBar").css("visibility", "hidden");
      sleep(4000).then(() => {
-      $("#mapOuterDiv").css("visibility", "visible");
-      $("#loaderContainer").css("visibility", "hidden");
-      $("#waiting").css("visibility","hidden")
+      $("#mapOuterDiv").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 1000);
+      $("#loaderContainer").css({"visibility":"hidden","display":"block"});
+      $("#waiting").css({"visibility":"hidden","display":"block"});
 
       if(localStorage.getItem("selection") == "undefined") {
         $("#selectionP").text("Cannot find a place in your area");
@@ -468,35 +475,34 @@ function randomGenerate(SelectionArray){
 </head>
 
 <body>
+    <div id="application" class="cover-container d-flex h-100 p-3 mx-auto flex-column">
 
-
-    <div id="loaderContainer" style="visibility: hidden">
-        <p id="waiting">Applying complex algorithm to find out what you are craving</p>
-        <span id="loader"></span>
-    </div>
-
-  <div id="application">
-    <header class="masthead mb-auto">
+    <header class="masthead">
       <div class="inner">
-        <h3 class="masthead-brand">Decider</h3>
+        <h3 class="masthead-brand" id="header-decide">Decider</h3>
         <nav class="nav nav-masthead justify-content-center">
-          <a class="nav-link" href="/Users/Jhuanderson/Desktop/Deicder/decidercover.html">Home</a>
+          <a class="nav-link" href="/Users/Jhuanderson/Desktop/Web Application/Deicder/decidercover.html">Home</a>
           <a class="nav-link active" href="#">Features</a>
         </nav>
       </div>
     </header>
+
+    <div id="loaderContainer" style="visibility: hidden; display:none">
+        <h1 id="waiting">Calculating...</h1>
+        <span id="loader"></span>
+    </div>
    
     <main role="main" class="inner cover" id="mainBody">
       
       <div id="features">
         <button type="button" onclick="showFoodSelection()" id="foodInputButton">Need help with your craving</button>
-        <button type="button" onclick="enterLocation()" id="foodInputButton">Need Help Tonight's Adventure</button>
+        <button type="button" onclick="enterLocation()" id="foodInputButton">Need Help with Tonight's Adventure</button>
       </div>
 
         <div id="foodInput" style="visibility: hidden">
           <div class="ui-widget">
             <p id="choosen"></p>
-            <label for="automplete-3" id="labelforAA">Enter the cuisine you are craving</label>
+            <label for="automplete-3" id="labelforAA">Plase use dropdown to enter the cuisines you are craving</label>
             <textarea id="automplete-3" width="200px" height="500px"></textarea>
           </div>
 
@@ -508,12 +514,6 @@ function randomGenerate(SelectionArray){
           </div>
         </div>
 
-          
-              
-              
-
-
-   
     </main>
 
     <div id="mapOuterDiv" style="visibility: hidden">
@@ -529,7 +529,8 @@ function randomGenerate(SelectionArray){
             <br>
             <span id="place-address"></span>
           </div>
-    
+
+          <button type="button" onclick="reload()"  height="200px" width:"200px">Reload</button>
       </div>
 
   </div>
