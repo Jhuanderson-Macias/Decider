@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+
+  <title>Decider</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="https://code.jquery.com/ui/1.12.1/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+
+
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30="
+    crossorigin="anonymous"></script>
+
+
+
+  <!-- Custom styles for this template  -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+
+  
+  <link href="decider.css" rel="stylesheet"> 
+</head>
+<style>
+  /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+
+  #features{
+  position: absolute;
+  width: 300px;
+  height: 200px;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+  }
+
+  #pac-input{
+      width: 400px;
+  }
+
+  #automplete-3{
+    margin-bottom: 25px;
+  }
+
+  #loaderContainer{
+  position: relative;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+  border: 3px;
+  display:block;
+  height: 200px;
+  }
+
+  #foodInputButton{
+    cursor: pointer;
+    position: relative;
+    left: 0;
+    background-color: #EEE;
+    margin: .5em;
+    padding: .3em 0;
+    height: 1.6em;
+    border-radius: 4px;
+    width: 200px;
+    height: 150px;
+  }
+ #foodInput{
+  position: absolute;
+  z-index: 15;
+  top: 25%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+ }
+
+  #foodInputButton:hover {
+  background-color:darkgray;
+  color: white;
+}
+
+ #submit{
+  margin-top: 25px
+ }
+
+ #header-decide-bar{
+   padding-left:30px;
+   padding-right: 100px;
+   margin-left: 50px;
+   justify-content: left;
+ }
+
+  #loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position:absolute;
+    margin-left: 50px;
+    margin-top: 50px;
+}
+  /* Safari */
+  @-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+
+  /* Optional: Makes the sample page fill the window. */
+
+  #labelforAA{
+    display: -webkit-box;
+  }
+
+  #features {
+    animation: 1s ease-out 0s 1 slideInFromLeft;
+  }
+
+   #map {
+    height: 100%;
+    width: 100%; 
+  }
+
+  #mapOuterDiv{
+    bottom: 100%;
+    margin-top: 34px;
+    width: 80%;
+    height: 400px;
+    /* padding: 0%; */
+    margin: 0px 0 0 100px;
+    float: left;
+    top:50%;
+
+  }
+
+
+</style>
+<script>
+    var terms =[] 
+    var infowindow;
+    var place;
+    localStorage.ifBar = "";
+    localStorage.type = "";
+
+function Expander() {
+    	
+      this.start = function () {
+            
+          $("#automplete-3").keydown(function(e) {
+                       
+              this.style.width = 0;
+              var newWidth = this.scrollWidth + 10;
+            
+              if( this.scrollWidth >= this.clientWidth )
+                  newWidth += 10;
+              
+              this.style.width = newWidth + 'px';
+            
+          });
+          
+      }
+        
+  }
+
+   
+  $(function () {
+    window.app = new Expander();
+   	
+
+
+    var availableTutorials = ['Afghan', 'African', 'Albanian', 'American',
+      'Arabian', 'Argentinian', 'Armenian', 'Asian Fusion', 'Australian', 'Austrian',
+      'Bagels', 'Bakery', 'Bangladeshi', 'Barbeque', 'Belgian', 'Brasseries', 'Brazilian',
+      'Breakfast', 'British', 'Brunch', 'Buffets', 'Burgers', 'Burmese', 'Cafes', 'Cafeteria',
+      'Cajun', 'Californian', 'Calzones', 'Cambodian', 'Cantonese', 'Caribbean', 'Catalan',
+      'Cheesesteaks', 'Chicken', 'Chicken Wings', 'Chili', 'Chinese', 'Classic', 'Coffee and Tea',
+      'Colombian', 'Comfort Food', 'Costa Rican', 'Creole', 'Crepes', 'Cuban', 'Czech', 'Delis', 'Dessert',
+      'Dim Sum', 'Diner', 'Dominican', 'Eclectic', 'Ecuadorian', 'Egyptian', 'El Salvadoran', 'Empanadas',
+      'English', 'Ethiopian', 'Fast Food', 'Filipino', 'Fine Dining', 'Fish & Chips', 'Fondue', 'Food Cart',
+      'Food Court', 'Food Stands', 'French', 'Fresh Fruits', 'Frozen Yogurt', 'Gastropubs', 'German', 'Gluten-Free',
+      'Greek', 'Grill', 'Guatemalan', 'Gyro', 'Haitian', 'Halal', 'Hawaiian', 'Himalayan', 'Hoagies', 'Hot Dogs', 'Hot Pot',
+      'Hungarian', 'Iberian', 'Ice Cream', 'Indian', 'Indonesian', 'Irish', 'Italian', 'Jamaican', 'Japanese', 'Kids', 'Korean',
+      'Kosher', 'Laotian', 'Late Night', 'Latin American', 'Lebanese', 'Low Carb', 'Malaysian', 'Mandarin',
+      'Mediterranean', 'Mexican', 'Middle Eastern', 'Modern European', 'Mongolian', 'Moroccan', 'Nepalese', 'Noodles', 'Nouvelle cuisine',
+      'Nutritious', 'Organic', 'Pakistani', 'Pancakes', 'Pasta', 'Persian', 'Persian and Iranian', 'Peruvian', 'Pitas', 'Pizza', 'Polish',
+      'Portuguese', 'Potato', 'Poutineries', 'Pub Food', 'Puerto Rican', 'Ribs', 'Russian', 'Salad', 'Sandwiches', 'Scandinavian',
+      'Scottish', 'Seafood', 'Senegalese', 'Singaporean', 'Slovakian', 'Small Plates', 'Smoothies and Juices', 'Soul Food', 'Soup',
+      'South African', 'South American', 'Southern', 'Southwestern', 'Spanish', 'Sri Lankan', 'Steakhouses', 'Subs', 'Supper Clubs',
+      'Sushi', 'Syrian', 'Szechwan', 'Taiwanese', 'Tapas', 'Tex-Mex', 'Thai', 'Tibetan', 'Turkish', 'Ukrainian', 'Uzbek', 'Vegan',
+      'Vegetarian', 'Vietnamese', 'Wraps'
+    ];
+
+    function split( val ) {
+      return val.split( /,\s*/ );
+    }
+    function extractLast( term ) {
+      return split( term ).pop();
+    }
+
+    $("#automplete-3").autocomplete({
+      minLength: 2,
+      delay: 500,
+      source: function( request, response ) {
+          // delegate back to autocomplete, but extract the last term
+          response( $.ui.autocomplete.filter(
+            availableTutorials, extractLast( request.term ) ) );
+        },
+        focus: function() {
+          // prevent value inserted on focus
+          
+          return false;
+        },
+        select: function( event, ui ) {
+          terms = split( this.value );
+          // remove the current input
+          terms.pop();
+          // add the selected item
+          terms.push( ui.item.value );
+          // add placeholder to get the comma-and-space at the end
+          terms.push( "" );
+          console.log(terms)
+
+          this.value = terms.join( ", " );
+            
+          return false;
+        }
+        
+       
+    });
+
+              
+
+  });
+  
+
+
+
+function showFoodSelection() {
+  $("#features").css("visibility", "hidden");
+  $("#foodInput").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  $(".Location_forBar").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  localStorage.ifBar = false;
+  localStorage.type = "resturant";
+}
+
+function enterLocation() {
+  console.log("enterlocation");
+  $(".Location_forBar").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 500);
+  $("#features").css("visibility", "hidden");
+  localStorage.ifBar = true;
+  localStorage.type ="bar";
+}
+
+let selection = "";
+function randomGenerate(SelectionArray){
+  var randomgen = Math.floor(Math.random() * (SelectionArray.length-1));
+  console.log("RADOM NUMBER: " + randomgen);
+  console.log("RADOM SELECT: " + SelectionArray[randomgen]);
+  localStorage.setItem("selection",SelectionArray[randomgen]);
+  return SelectionArray[randomgen];
+}
+
+
+
+  var keywordFilter = 0;
+  $(function () {
+    $('#button').on('click', function (event) {
+      keywordFilter = $("#keyword").val();
+      console.log(keyword);
+    });
+  });
+
+  // This example requires the Places library. Include the libraries=places
+  // parameter when you first load the API. For example:
+  // <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo45h3F0P6M4c5UJHM3Y_zLfJOs7WeCXI&libraries=places">
+    function initMap() {
+  // Styles a map in night mode.
+  
+
+    var input = document.getElementById('pac-input');
+
+    var autocomplete = new google.maps.places.Autocomplete(input);
+    //autocomplete.bindTo('bounds', map);
+    autocomplete.addListener('place_changed', function () {
+      var place = autocomplete.getPlace();
+      if (!place.geometry) {
+        return;
+      } else {
+        console.log("yooo");
+        place = place.geometry.location;
+
+       var map = new google.maps.Map(document.getElementById('map'), {
+    center: place,
+    zoom: 15,
+    styles: [
+      {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
+      {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
+      {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
+      {
+        featureType: 'administrative.locality',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#d59563'}]
+      },
+      {
+        featureType: 'poi',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#d59563'}]
+      },
+      {
+        featureType: 'poi.park',
+        elementType: 'geometry',
+        stylers: [{color: '#263c3f'}]
+      },
+      {
+        featureType: 'poi.park',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#6b9a76'}]
+      },
+      {
+        featureType: 'road',
+        elementType: 'geometry',
+        stylers: [{color: '#38414e'}]
+      },
+      {
+        featureType: 'road',
+        elementType: 'geometry.stroke',
+        stylers: [{color: '#212a37'}]
+      },
+      {
+        featureType: 'road',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#9ca5b3'}]
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'geometry',
+        stylers: [{color: '#746855'}]
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'geometry.stroke',
+        stylers: [{color: '#1f2835'}]
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#f3d19c'}]
+      },
+      {
+        featureType: 'transit',
+        elementType: 'geometry',
+        stylers: [{color: '#2f3948'}]
+      },
+      {
+        featureType: 'transit.station',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#d59563'}]
+      },
+      {
+        featureType: 'water',
+        elementType: 'geometry',
+        stylers: [{color: '#17263c'}]
+      },
+      {
+        featureType: 'water',
+        elementType: 'labels.text.fill',
+        stylers: [{color: '#515c6d'}]
+      },
+      {
+        featureType: 'water',
+        elementType: 'labels.text.stroke',
+        stylers: [{color: '#17263c'}]
+      }
+    ]
+  });
+        
+        infowindow = new google.maps.InfoWindow();
+        var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch({
+          location: place,
+          radius: 500,
+          type: [localStorage.type],
+          keyword: randomGenerate(terms)
+        }, callback);
+
+        function callback(results, status) {
+          if (results.length == 0){
+            console.log("nothing here");
+            localStorage.setItem("selection","undefined");
+          }
+          if (status === google.maps.places.PlacesServiceStatus.OK) {
+           
+            if(localStorage.type =='bar'){
+            var randomgen = Math.floor(Math.random() * (results.length-1));
+              createMarker(results[randomgen]);
+              console.log(results[randomgen].name);  
+              localStorage.name = results[randomgen].name;
+              localStorage.setItem("selection","is Bar");
+                      } else {
+
+            for (var i = 0; i < results.length; i++) {
+             createMarker(results[i]);
+            }
+          }
+          }
+        }
+
+        function createMarker(place) {
+          var placeLoc = place.geometry.location;
+          var marker = new google.maps.Marker({
+            map: map,
+            position: place.geometry.location,
+          });
+
+          google.maps.event.addListener(marker, 'click', function () {
+            infowindow.setContent(place.name);
+            infowindow.open(map, this);
+          });
+        }
+      }
+    });
+  }
+
+  function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function reload(){
+  location.reload();
+}
+
+      function showMap(){
+      $("#loaderContainer").css({"visibility": "visible","display":"block"});
+      $("#foodInput").css("visibility", "hidden");
+      $(".Location_forBar").css("visibility", "hidden");
+     sleep(4000).then(() => {
+      $("#mapOuterDiv").css({opacity: 0, visibility: "visible"}).animate({opacity: 1.0}, 1000);
+      $("#loaderContainer").css({"visibility":"hidden","display":"block"});
+      $("#waiting").css({"visibility":"hidden","display":"block"});
+
+      if(localStorage.getItem("selection") == "undefined") {
+        $("#selectionP").text("Cannot find a place in your area");
+      } 
+      
+      else if (localStorage.ifBar == "false") {
+        $("#selectionP").text("Your Craving has been choosen: " +  localStorage.getItem("selection"));
+      }
+
+      else{
+        $("#selectionP").text("The Bar has been choosen. Go to " +  localStorage.name);
+      };
+
+      
+});
+     
+    }
+
+</script>
+</head>
+
+<body>
+    <div id="application" class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+
+    <header class="masthead">
+      <div class="inner">
+        <h3 class="masthead-brand" id="header-decide">Decider</h3>
+        <nav class="nav nav-masthead justify-content-center">
+          <a class="nav-link" href="/decidercover.html">Home</a>
+          <a class="nav-link active" href="#">Features</a>
+        </nav>
+      </div>
+    </header>
+
+    <div id="loaderContainer" style="visibility: hidden; display:none">
+        <h1 id="waiting">Calculating...</h1>
+        <span id="loader"></span>
+    </div>
+   
+    <main role="main" class="inner cover" id="mainBody">
+      
+      <div id="features">
+        <button type="button" onclick="showFoodSelection()" id="foodInputButton">Need help with your craving</button>
+        <button type="button" onclick="enterLocation()" id="foodInputButton">Need Help with Tonight's Adventure</button>
+      </div>
+
+        <div id="foodInput" style="visibility: hidden">
+          <div class="ui-widget">
+            <p id="choosen"></p>
+            <label for="automplete-3" id="labelforAA">Plase use dropdown to enter the cuisines you are craving</label>
+            <textarea id="automplete-3" width="200px" height="500px"></textarea>
+          </div>
+
+          <div class="Location_forBar" style="visibility: hidden"> 
+        <input id="pac-input" class="controls" type="text" placeholder="Enter a location">
+        <div class="lead">
+          <button type="button" class="btn btn-lg btn-secondary" id="submit" onclick="showMap()">Submit</button>
+        </div>
+          </div>
+        </div>
+
+    </main>
+
+    <div id="mapOuterDiv" style="visibility: hidden">
+        <div id="selectiondiv">
+            <p id="selectionP"></p>
+          </div>
+
+          <div id="map"></div>
+        
+          <div id="infowindow-content">
+            <span id="place-name" class="title"></span>
+            <span id="place-id"></span>
+            <br>
+            <span id="place-address"></span>
+          </div>
+
+          <button type="button" onclick="reload()"  height="200px" width:"200px">Reload</button>
+      </div>
+
+  </div>
+
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo45h3F0P6M4c5UJHM3Y_zLfJOs7WeCXI&libraries=places&callback=initMap"
+    async defer></script>
+
+
+</body>
+
+</html>
